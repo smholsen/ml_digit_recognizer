@@ -11,6 +11,7 @@
 <script>
   import Header from './components/Header'
   import Menu from './components/Menu'
+
   export default {
     name: 'App',
     components: {
@@ -32,7 +33,7 @@
         // this.menu_toggled = false;
       }
     }
-}
+  }
 </script>
 
 <style lang="scss">
@@ -42,25 +43,32 @@
 
   body {
     margin: 0;
-    font-family: 'Roboto',sans-serif;
-  }
-  #app {
-    width: 100%;
+    font-family: 'Roboto', sans-serif;
+    #app {
+      width: 100%;
 
-    .wrapper {
-      padding: 40px;
+      .wrapper {
+        padding: 40px;
+
+        .card {
+          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+          height: 100%;
+        }
+      }
     }
   }
+
   .hide {
-    @media screen and (max-width: 1599px){
-      max-height: 0!important;
+    @media screen and (max-width: 1599px) {
+      max-height: 0 !important;
     }
-    @media screen and (min-width: 1600px){
-      width: 0!important;
+    @media screen and (min-width: 1600px) {
+      width: 0 !important;
     }
   }
+
   .pad {
-    @media screen and (max-width: 1599px){
+    @media screen and (max-width: 1599px) {
 
     }
     @media screen and (min-width: 1600px) {
