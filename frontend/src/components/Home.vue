@@ -56,14 +56,14 @@
                 <img class="mascot" src="../assets/kitty_predictions.png">
                 <div class="speech-bubble">
                   <h2>This is my prediction</h2>
-                  <span>5</span>
+                  <span>{{suggested_digit}}</span>
                   Was I correct?
                 </div>
               </div>
               <div class="button-container">
-                <button class="btn btn-default">Try Again</button>
-                <button class="btn btn-danger">Not Correct</button>
-                <button class="btn btn-success">Correct</button>
+                <button @click="restart" class="btn btn-default">Try Again</button>
+                <button @click="not_correct" class="btn btn-danger">Not Correct</button>
+                <button @click="correct" class="btn btn-success">Correct</button>
               </div>
             </div>
 
@@ -77,18 +77,8 @@
               </div>
               <div class="button-container">
                 <div class="btn-group" role="group" aria-label="Basic example">
-                  <button type="button" class="btn btn-secondary">0</button>
-                  <button type="button" class="btn btn-secondary">1</button>
-                  <button type="button" class="btn btn-secondary">2</button>
-                  <button type="button" class="btn btn-secondary">3</button>
-                  <button type="button" class="btn btn-secondary">4</button>
-                  <button type="button" class="btn btn-secondary">5</button>
-                  <button type="button" class="btn btn-secondary">6</button>
-                  <button type="button" class="btn btn-secondary">7</button>
-                  <button type="button" class="btn btn-secondary">8</button>
-                  <button type="button" class="btn btn-secondary">9</button>
-                  <button type="button" class="btn btn-danger">No</button>
-
+                  <button v-for="i in 10" @click="train(i-1)" type="button" class="btn btn-secondary">{{i-1}}</button>
+                  <button @click="restart" type="button" class="btn btn-danger">No</button>
                 </div>
               </div>
             </div>
@@ -100,6 +90,9 @@
                   Thanks! I will use that information to improve my future predictions!
                 </div>
               </div>
+              <div class="right">
+                <button @click="restart" class="btn btn-success">Go again</button>
+              </div>
             </div>
           </div>
         </div>
@@ -109,24 +102,50 @@
 </template>
 
 <script>
+  import axios from 'axios'
   export default {
     name: "Home",
     data() {
       return {
         can_predict: true,
         // Output Stages are set in the mounted section.
-        output_stages: {}
+        output_stages: {},
+        suggested_digit: 0
       }
     },
     methods: {
       clear: function () {
+        this.can_predict = true;
+      },
+      restart: function () {
+        this.clear();
+        this.set_output_stage(this.output_stages.start)
 
       },
       predict: function () {
         if (this.can_predict) {
           this.can_predict = false;
           this.set_output_stage(this.output_stages.thinking)
+          //TODO: Disable Canvas
+          const path = 'http://digits.simonolsen.no/api/random';
+          axios.get(path)
+            .then(response => {
+              this.suggested_digit = response.data.randomNumber
+              this.set_output_stage(this.output_stages.prediction)
+            })
+            .catch(error => {
+              console.log(error)
+            })
         }
+      },
+      correct: function () {
+        this.set_output_stage(this.output_stages.training)
+      },
+      not_correct: function () {
+        this.set_output_stage(this.output_stages.incorrect)
+      },
+      train: function (actual_value) {
+        this.set_output_stage(this.output_stages.training)
       },
       set_output_stage: async function (stage) {
         await this.hide_all();
@@ -174,7 +193,7 @@
     height: 100%;
 
     * {
-      transition: 2s all;
+      transition: .5s all;
     }
 
     .input {
@@ -247,6 +266,7 @@
       overflow: hidden;
       .centerer {
         display: flex;
+        justify-content: center;
         .speech-bubble {
           height: fit-content;
           text-align: center;
@@ -258,6 +278,12 @@
             display: block;
             font-size: 45px;
           }
+        }
+      }
+      .button-container {
+            text-align: right;
+        button {
+          margin-left: 20px;
         }
       }
     }
@@ -299,6 +325,9 @@
         display: flex;
         .speech-bubble {
         }
+      }
+      .right {
+        text-align: right;
       }
     }
 
