@@ -3,6 +3,9 @@
     <div class="card bg-default">
       <div class="card-header font-weight-bold">Input</div>
       <div class="card-body input">
+        <div class="squiggly">
+          <span>Draw your digit here </span> <img class="arrow" src="../assets/arrow.png"/>
+        </div>
         <div class="canvas-container">
           <canvas id="drawing-board"
                   v-on:mousedown="mouse_down"
@@ -27,7 +30,10 @@
 </template>
 
 <script>
+  // Normal Canvas
   // http://www.williammalone.com/articles/create-html5-canvas-javascript-drawing-app/
+  // For Touch
+  // https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
   export default {
     name: "Canvas",
     props: [
@@ -35,11 +41,15 @@
     ],
     data() {
       return {
+        // These are for drawing with mouse
         paint: false,
         clickX: [],
         clickY: [],
         clickDrag: [],
+        // These are for touch
+        ongoingTouches: [],
         // The following are set in mounted
+        canvas: null,
         context: null,
         offsetX: 0,
         offsetY: 0
@@ -57,8 +67,17 @@
           this.clickDrag = [];
         }
       },
+      set_offset: function () {
+        // Set offset
+        // This is done on every draw, as it can change with different
+        // resizings in the DOM
+        let rect = this.canvas.getBoundingClientRect();
+        this.offsetX = rect.left;
+        this.offsetY = rect.top;
+      },
       mouse_down: function (e) {
         if (this.can_predict) {
+          this.set_offset();
           let mouseX = e.clientX - this.offsetX;
           let mouseY = e.clientY - this.offsetY;
           this.paint = true;
@@ -67,10 +86,11 @@
         }
       },
       mouse_move: function (e) {
+        this.set_offset();
         if (this.can_predict) {
           if (this.paint) {
-            let mouseX = e.pageX - this.offsetX;
-            let mouseY = e.pageY - this.offsetY;
+            let mouseX = e.clientX - this.offsetX;
+            let mouseY = e.clientY - this.offsetY;
             this.addClick(mouseX, mouseY, true);
             this.redraw();
           }
@@ -105,17 +125,47 @@
           self.context.closePath();
           self.context.stroke();
         }
+      },
+      initialize_for_touch: function () {
+        this.canvas.addEventListener("touchstart", this.handleStart, false);
+        this.canvas.addEventListener("touchend", this.handleEnd, false);
+        this.canvas.addEventListener("touchcancel", this.handleCancel, false);
+        this.canvas.addEventListener("touchmove", this.handleMove, false);
+      },
+      // These handlers are for Touch
+      handleStart: function (evt) {
+        evt.preventDefault();
+        let touches = evt.changedTouches;
+
+        for (let i = 0; i < touches.length; i++) {
+          this.mouse_down(touches[i])
+        }
+      },
+      handleMove: function (evt) {
+        evt.preventDefault();
+        let touches = evt.changedTouches;
+
+        for (let i = 0; i < touches.length; i++) {
+          this.mouse_move(touches[i])
+        }
+      },
+      handleEnd: function (evt) {
+        evt.preventDefault();
+        this.mouse_up()
+      },
+      handleCancel: function (evt) {
+        evt.preventDefault();
+        this.mouse_up()
       }
     },
     mounted() {
       this.context = document.getElementById('drawing-board').getContext("2d");
+      this.canvas = document.getElementById('drawing-board');
       // Set correct width & height
       this.context.canvas.width = 200;
       this.context.canvas.height = 200;
-      // Set offset
-      let rect = document.getElementById('drawing-board').getBoundingClientRect();
-      this.offsetX = rect.left;
-      this.offsetY = rect.top;
+      // Initialize for Touch
+      this.initialize_for_touch();
     }
   }
 </script>
@@ -125,21 +175,37 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    height: 100%;
+
+    .squiggly {
+      text-align: center;
+      font-family: 'Indie Flower', cursive;
+      font-size: 30px;
+      display: inline;
+
+      .arrow {
+        width: 50px;
+        height: auto;
+        display: inline;
+        transform: scaleX(-1);
+      }
+    }
 
     .canvas-container {
       display: flex;
       justify-content: center;
+      margin-top: 20px;
 
       #drawing-board {
+        cursor: pointer;
         width: 200px;
         height: 200px;
-        border: 1px solid black;
+        box-shadow: 0 0 8px 8px rgba(0, 0, 0, 0.2), 6px 6px 6px 6px rgba(0, 0, 0, 0.19);
       }
 
     }
 
     .button-container {
-      margin-top: 20px;
       display: flex;
       justify-content: flex-end;
 
