@@ -1,19 +1,17 @@
 <template>
   <div>
     <div class="row d-flex">
-      <Canvas ref="canvas"
-        :can_predict="can_predict"
-        v-on:predict="predict"></Canvas>
+      <Canvas id="canvas-top" ref="canvas"
+              :can_predict="can_predict"
+              v-on:predict="predict"></Canvas>
 
       <div class="col-lg-6 col-m-12 mb-4">
-        <div class="card bg-default">
+        <div id="output-top" class="card bg-default">
           <div class="card-header font-weight-bold">Output</div>
           <div class="card-body output">
-            <div id="not-started">
+            <div id="not-started" class="current-state">
               <div class="centerer">
-                <div>
-                  <img class="mascot" src="../assets/dog.png">
-                </div>
+                <img class="mascot" src="../assets/dog.png">
                 <div class="mascot_do_draw">
                   <div class="speech-bubble">
                     Hi!<br>
@@ -23,8 +21,8 @@
                 </div>
               </div>
             </div>
-            <div id="thinking">
-              <div class="row">
+            <div id="thinking" class="current-state">
+              <div class="centerer">
                 <img class="mascot" src="../assets/dog_think.png">
                 <div class="speech-bubble">
                   Im thinking!
@@ -36,7 +34,7 @@
                 <span id="bubblingG_3"></span>
               </div>
             </div>
-            <div id="predictions">
+            <div id="predictions" class="current-state">
               <div class="centerer">
                 <img class="mascot" src="../assets/kitty_predictions.png">
                 <div class="speech-bubble">
@@ -52,12 +50,11 @@
               </div>
             </div>
 
-            <div id="incorrect">
+            <div id="incorrect" class="current-state">
               <div class="centerer">
                 <img class="mascot" src="../assets/kitty_sad.png">
                 <div class="speech-bubble">
-                  Can you tell me what digit you drew, so that I can
-                  learn from you?
+                  Can you tell me what digit you drew?
                 </div>
               </div>
               <div class="button-container">
@@ -68,14 +65,14 @@
               </div>
             </div>
 
-            <div id="improve">
+            <div id="improve" class="current-state">
               <div class="centerer">
                 <img class="mascot" src="../assets/kitty_train.png">
                 <div class="speech-bubble">
                   Thanks! I will use that information to improve my future predictions!
                 </div>
               </div>
-              <div class="right">
+              <div class="button-container">
                 <button @click="restart" class="btn btn-success">Go again</button>
               </div>
             </div>
@@ -115,22 +112,34 @@
       restart: function () {
         this.clear();
         this.set_output_stage(this.output_stages.start)
-
+        this.scroll_to('input')
       },
       predict: function () {
         if (this.can_predict) {
           this.can_predict = false;
           this.set_output_stage(this.output_stages.thinking)
-          //TODO: Disable Canvas
+          this.scroll_to('output')
           const path = 'http://digits.simonolsen.no/api/random';
           axios.get(path)
             .then(response => {
               this.suggested_digit = response.data.randomNumber
               this.set_output_stage(this.output_stages.prediction)
+              this.scroll_to('output')
             })
             .catch(error => {
               console.log(error)
             })
+        }
+      },
+      scroll_to: function (box) {
+        if (box === 'input') {
+          document.getElementById('canvas-top').scrollIntoView({
+            behavior: 'smooth'
+          });
+        } else if (box === 'output') {
+          document.getElementById('output-top').scrollIntoView({
+            behavior: 'smooth'
+          });
         }
       },
       correct: function () {
@@ -149,13 +158,13 @@
           this.output_stages.start.style.maxHeight = "390px";
         }
         else if (stage === this.output_stages.thinking) {
-          this.output_stages.thinking.style.maxHeight = "390px";
+          this.output_stages.thinking.style.maxHeight = "500px";
         }
         else if (stage === this.output_stages.prediction) {
-          this.output_stages.prediction.style.maxHeight = "390px";
+          this.output_stages.prediction.style.maxHeight = "600px";
         }
         else if (stage === this.output_stages.incorrect) {
-          this.output_stages.incorrect.style.maxHeight = "390px";
+          this.output_stages.incorrect.style.maxHeight = "550px";
         }
         else if (stage === this.output_stages.training) {
           this.output_stages.training.style.maxHeight = "390px";
