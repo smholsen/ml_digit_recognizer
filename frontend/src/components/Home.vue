@@ -119,10 +119,13 @@
           this.can_predict = false;
           this.set_output_stage(this.output_stages.thinking)
           this.scroll_to('output')
-          const path = 'http://digits.simonolsen.no/api/random';
-          axios.get(path)
+          const path = 'http://digits.simonolsen.no/api/predict';
+          let canvas_data_url = this.$refs.canvas.getDataUrl();
+          axios.post(path, {
+            data_url_base_64: canvas_data_url
+          })
             .then(response => {
-              this.suggested_digit = response.data.randomNumber
+              this.suggested_digit = response.data.prediction
               this.set_output_stage(this.output_stages.prediction)
               this.scroll_to('output')
             })

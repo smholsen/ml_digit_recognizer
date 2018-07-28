@@ -59,6 +59,11 @@
       predict: function () {
         this.$emit('predict');
       },
+      // This methos is used by the Home Component to obtain the image from the canvas
+      // To use in its post request to the server.
+      getDataUrl: function () {
+        return this.canvas.toDataURL();
+      },
       clear: function (force = false) {
         if (this.can_predict || force) {
           this.context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height);
@@ -112,7 +117,7 @@
         this.context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height); // Clears the canvas
         this.context.strokeStyle = "#000000";
         this.context.lineJoin = "round";
-        this.context.lineWidth = 7;
+        this.context.lineWidth = 10;
 
         for (let i = 0; i < this.clickX.length; i++) {
           self.context.beginPath();
