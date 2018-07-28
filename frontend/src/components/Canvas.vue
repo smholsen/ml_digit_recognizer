@@ -17,7 +17,7 @@
           </canvas>
         </div>
         <div class="button-container">
-          <button @click="clear" v-bind:class="{disabled: !can_predict}" class="btn btn-secondary">
+          <button @click="clear(false)" v-bind:class="{disabled: !can_predict}" class="btn btn-secondary">
             Clear
           </button>
           <button @click="predict" v-bind:class="{disabled: !can_predict}" class="btn btn-success">
@@ -195,6 +195,7 @@
       display: flex;
       justify-content: center;
       margin-top: 20px;
+      margin-bottom: 20px;
 
       #drawing-board {
         cursor: pointer;
